@@ -15,7 +15,6 @@ sql_create_voicings_table = """ CREATE TABLE IF NOT EXISTS fingerings (
 def create_connection():
     try:
         conn = sqlite3.connect(dbpath)
-        print("Opened database successfully")
     except Error as e:
         print(e)
 

@@ -1,5 +1,9 @@
+from tkinter import CHORD
 import rtmidi
 import time
+
+CHORDDURATION = 1.25
+ARPDURATION = .5
 
 class Player:
     def __init__(self):
@@ -36,18 +40,17 @@ class Player:
         for tup in events:
             note_on, note_off = tup
             self.midiout.send_message(note_on)
-        time.sleep(1.25)
+        time.sleep(CHORDDURATION)
         for tup in events:
             note_on, note_off = tup
             self.midiout.send_message(note_off)
-            
-    
+
     def playarpeggio(self, notes):
         events = self.makeonoffmessages(notes)
         for tup in events:
             note_on, note_off = tup
             self.midiout.send_message(note_on)
-            time.sleep(0.5)
+            time.sleep(ARPDURATION)
             self.midiout.send_message(note_off)
             
 

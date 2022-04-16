@@ -7,7 +7,7 @@ class ChordManager:
         self.fingering = [] #low E string at index 0, high E at index 5
         self.midinotes = [] #holds the midi note value
         self.maxposition = 15
-        self.getnew()
+        self.setnew()
 
     def parsefing(self, newfromdb):
         fingstring = newfromdb[0]
@@ -15,6 +15,7 @@ class ChordManager:
 
     def parsetags(self, newfromdb):
         pass
+
     def setmidinotes(self):
         self.midinotes = []
         for i, fret in enumerate(self.fingering):
@@ -26,8 +27,18 @@ class ChordManager:
         for i, x in enumerate(self.fingering):
             if (x != -1):
                 self.fingering[i] = randpos + x
+    
+    def printfingering(self):
+        printstring = ''
+        for fret in self.fingering:
+            if fret == -1:
+                printstring += 'x'
+            else:
+                printstring += str(fret)
+            printstring += ' '
+        print(printstring)
                 
-    def getnew(self):
+    def setnew(self):
         newfromdb = fetchrandfing()
         self.parsefing(newfromdb)
         self.parsetags(newfromdb)
