@@ -1,8 +1,12 @@
 import sqlite3
 from sqlite3 import Error
 import re
+import os
 
-dbpath = r'C:\\Users\\Chris\source\\repos\\GuitarChordEarTrainer\\Data\\data.db'
+dirpath = os.path.dirname(__file__)
+dbpath = os.path.join(dirpath, 'Data', 'data.db')
+csvpath = os.path.join(dirpath,'Data','voicings.csv')
+
 sql_create_voicings_table = """ CREATE TABLE IF NOT EXISTS fingerings (
                                     fingering text NOT NULL PRIMARY KEY,
                                     tag text
@@ -28,6 +32,7 @@ def create_table(conn, create_table_sql):
         c.execute(create_table_sql)
     except Error as e:
         print(e)
+
 def drop_table(conn):
     drop_sql = """DROP TABLE fingerings;"""
     try:
@@ -43,7 +48,7 @@ def insert_fingering(conn, fingering):
     conn.commit()
     return cur.lastrowid
 
-def readin_csv(conn, filepath='C:\\Users\\Chris\source\\repos\\GuitarChordEarTrainer\\Data\\voicings.csv'):
+def readin_csv(conn, filepath=csvpath):
     with open(filepath) as f:
         tag = 'NULL'
         for line in f:
@@ -51,9 +56,8 @@ def readin_csv(conn, filepath='C:\\Users\\Chris\source\\repos\\GuitarChordEarTra
                 tag = line[1:-6]
                 continue
             if re.match(r"^((-1|[0-4]),){5}(-1|[0-4])$", line):
-                fingering = line
+                fingering = line[:-1]
                 x = insert_fingering(conn, (fingering, tag))
-                print(x)
             
 
 def refresh_db():
@@ -62,7 +66,14 @@ def refresh_db():
     create_table(conn, sql_create_voicings_table)
     readin_csv(conn)
     conn.close()
-    #create new table
-    #read in data from voicings.csv
 
-refresh_db()
+select_rand_sql = """SELECT * FROM fingerings ORDER BY RANDOM() LIMIT 1; """
+def fetchrandfing():
+    conn = create_connection()
+    c = conn.cursor()
+    c.execute(select_rand_sql)
+    record = c.fetchall()
+    conn.close()
+    return record[0] #grab the single tuple from the list
+
+
