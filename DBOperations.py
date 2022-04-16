@@ -2,6 +2,7 @@ import sqlite3
 from sqlite3 import Error
 import re
 import os
+import random
 
 dirpath = os.path.dirname(__file__)
 dbpath = os.path.join(dirpath, 'Data', 'data.db')
@@ -43,9 +44,12 @@ def insert_fingering(conn, fingering):
     sql = '''INSERT INTO fingerings(fingering, tag)
              VALUES(?,?)''' 
     cur = conn.cursor()
-    cur.execute(sql, fingering)
-    conn.commit()
-    return cur.lastrowid
+    try:
+        cur.execute(sql, fingering)
+        conn.commit()
+        return cur.lastrowid
+    except Error as e:
+        print(fingering)
 
 def readin_csv(conn, filepath=csvpath):
     with open(filepath) as f:
@@ -66,13 +70,21 @@ def refresh_db():
     readin_csv(conn)
     conn.close()
 
-select_rand_sql = """SELECT * FROM fingerings ORDER BY RANDOM() LIMIT 1; """
+
+
+select_rand_sql1 = """SELECT * FROM fingerings where tag='"""
+select_rand_sql2 = """' ORDER BY RANDOM() LIMIT 1; """
 def fetchrandfing():
     conn = create_connection()
     c = conn.cursor()
-    c.execute(select_rand_sql)
+    #get list of distinct tags
+    c.execute("""select distinct tag from fingerings;""")
+    tags = c.fetchall()
+    #pick random tag, the [0] grabs the string from the tuple
+    tag = random.choice(tags)[0]
+    c.execute(select_rand_sql1+tag+select_rand_sql2)
     record = c.fetchall()
     conn.close()
-    return record[0] #grab the single tuple from the list
+    return record[0] #index to grab the single tuple from the list
 
-
+print(fetchrandfing())
