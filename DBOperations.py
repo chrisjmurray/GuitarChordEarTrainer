@@ -74,6 +74,7 @@ def refresh_db():
 
 select_rand_sql1 = """SELECT * FROM fingerings where tag='"""
 select_rand_sql2 = """' ORDER BY RANDOM() LIMIT 1; """
+
 def fetchrandfing():
     conn = create_connection()
     c = conn.cursor()
