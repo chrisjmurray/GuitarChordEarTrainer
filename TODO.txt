@@ -1,0 +1,18 @@
+Database
+- Read in multiple tags
+- create methods for selecting groups of provided tags
+    -and handing a single fingering back
+- refine the fingering fetch and parser, it won't work once you input voicings with multiple tags
+GUI
+- Design layout
+- image for fingering? or list fret numbers?
+-- no current working freboard drawing libraries for python
+-- would be easier to list frets next to string names
+    e: 7
+    B: 5
+    G: 6
+    D: 7
+    A: x
+    E: x
+        tags: tag1, tag2, tag3
+

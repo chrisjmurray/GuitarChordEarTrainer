@@ -1,7 +1,7 @@
 from fingerings import ChordManager
 from Player import Player
 
-welcome_string = """Welcome. Press enter to play chords and also to display the answer.\nEnter h for help, x for exit"""
+welcome_string = """Welcome. Press enter to play chords and also to display the answer.\nEnter h for help, x for exit, \nPress Enter to start"""
 help_string = """You're on your own, bucko"""
 class GameConsole:
     def __init__(self):
@@ -14,7 +14,6 @@ class GameConsole:
         running = True
         isDuringTurn = False
         print(welcome_string)
-        print("Enter to start")
         while(running):
             userin = input("> ")
             match userin:

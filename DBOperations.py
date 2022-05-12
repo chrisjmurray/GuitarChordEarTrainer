@@ -8,9 +8,18 @@ dirpath = os.path.dirname(__file__)
 dbpath = os.path.join(dirpath, 'Data', 'data.db')
 csvpath = os.path.join(dirpath,'Data','voicings.csv')
 
-sql_create_voicings_table = """ CREATE TABLE IF NOT EXISTS fingerings (
-                                    fingering text NOT NULL PRIMARY KEY,
-                                    tag text
+sql_create_fingerings_table = """ CREATE TABLE IF NOT EXISTS fingerings (
+                                    fingering text NOT NULL PRIMARY KEY
+                                    ); """
+
+sql_create_tags_table = """ CREATE TABLE IF NOT EXISTS tags (
+                                    tag_title text NOT NULL UNIQUE,
+                                    tag_id INTEGER PRIMARY KEY
+                                    ); """
+
+sql_create_fingerings_tags_table = """ CREATE TABLE IF NOT EXISTS fingerings_tags (
+                                    fingering text NOT NULL,
+                                    tag_id INTEGER 
                                     ); """
 
 def create_connection():
@@ -35,17 +44,38 @@ def create_table(conn, create_table_sql):
 
 def drop_table(conn):
     drop_sql = """DROP TABLE fingerings;"""
+    drop_sql_tags = """DROP TABLE tags;"""
+    drop_sql_tags_fingerings = """DROP table tags_fingerings"""
     try:
         conn.execute(drop_sql)
+        conn.execute(drop_sql_tags)
+        conn.execute(drop_sql_tags_fingerings)
     except Error as e:
         print(e)
 
-def insert_fingering(conn, fingering):
-    sql = '''INSERT INTO fingerings(fingering, tag)
-             VALUES(?,?)''' 
+def insert_fingering(conn, fingering, tags):
+    sql_fingering = '''INSERT INTO fingerings(fingering)
+                       VALUES(?)''' 
+    sql_tags =  '''INSERT INTO tags(tag_title)
+                   VALUES(?)''' 
+    sql_tags_fingerings = '''INSERT INTO fingerings_tags(fingering, tag_id)
+                             VALUES(?,?)'''
+    sql_select_tag_id = '''SELECT tag_id FROM tags
+                           WHERE tag_title = ? '''
     cur = conn.cursor()
     try:
-        cur.execute(sql, fingering)
+        cur.execute(sql_fingering, (fingering,))
+        for tag in tags:
+            cur.execute(sql_select_tag_id, (tag,))
+            tag_ids = cur.fetchall()
+            if len(tag_ids) == 0:
+                cur.execute(sql_tags, (tag,))
+                cur.execute(sql_select_tag_id, (tag,))
+                tag_ids = cur.fetchall()
+                cur.execute(sql_tags_fingerings, (fingering, tag_ids[0][0],))
+            else:
+                cur.execute(sql_tags_fingerings, (fingering, tag_ids[0][0],))
+                
         conn.commit()
         return cur.lastrowid
     except Error as e:
@@ -56,36 +86,38 @@ def readin_csv(conn, filepath=csvpath):
         tag = 'NULL'
         for line in f:
             if re.match(r'^#.+,,,,,$', line):
-                tag = line[1:-6]
+                tags = line[1:-6]
                 continue
             if re.match(r"^((-1|[0-4]),){5}(-1|[0-4])$", line):
                 fingering = line[:-1]
-                x = insert_fingering(conn, (fingering, tag))
+                x = insert_fingering(conn, fingering, [tags])
             
 
 def refresh_db():
     conn = create_connection()
     drop_table(conn)
-    create_table(conn, sql_create_voicings_table)
+    create_table(conn, sql_create_fingerings_table)
+    create_table(conn, sql_create_tags_table)
+    create_table(conn, sql_create_fingerings_tags_table)
     readin_csv(conn)
     conn.close()
 
 
 
-select_rand_sql1 = """SELECT * FROM fingerings where tag='"""
-select_rand_sql2 = """' ORDER BY RANDOM() LIMIT 1; """
+select_rand_sql1 = """SELECT * FROM fingerings_tags where tag_id="""
+select_rand_sql2 = """ ORDER BY RANDOM() LIMIT 1; """
 
 def fetchrandfing():
     conn = create_connection()
     c = conn.cursor()
-    #get list of distinct tags
-    c.execute("""select distinct tag from fingerings;""")
-    tags = c.fetchall()
+    #get all tags
+    #pick one of those tags
+    #pick one fingering with that tag
+    c.execute("""select distinct tag_id from tags;""")
+    tag_ids = c.fetchall()
     #pick random tag, the [0] grabs the string from the tuple
-    tag = random.choice(tags)[0]
-    c.execute(select_rand_sql1+tag+select_rand_sql2)
+    tag = random.choice(tag_ids)[0]
+    c.execute(select_rand_sql1+str(tag)+select_rand_sql2)
     record = c.fetchall()
     conn.close()
     return record[0] #index to grab the single tuple from the list
-
-print(fetchrandfing())
