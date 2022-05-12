@@ -37,6 +37,18 @@ class ChordManager:
                 printstring += str(fret)
             printstring += ' '
         print(printstring)
+    
+    def getfretlabels(self):
+        '''returns a list of strings for the fret labels. high e at index 0
+        and low E at index 5'''
+        labelList = []
+        for fret in self.fingering:
+            if fret == -1:
+                labelList.append('x')
+            else:
+                labelList.append(str(fret))
+        labelList.reverse()
+        return labelList
                 
     def setnew(self):
         newfromdb = fetchrandfing()
