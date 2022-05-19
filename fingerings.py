@@ -1,5 +1,6 @@
 from random import randint
-from DBOperations import fetchrandfing
+import DBOperations
+import confighandler
 
 class ChordManager:
     def __init__(self, tags = None):
@@ -7,6 +8,10 @@ class ChordManager:
         self.fingering = [] #low E string at index 0, high E at index 5
         self.midinotes = [] #holds the midi note value
         self.maxposition = 15
+        if tags == None:
+            self.tags = DBOperations.get_all_tags()
+        else:
+            self.tags = tags
         self.setnew()
 
     def parsefing(self, newfromdb):
@@ -49,11 +54,23 @@ class ChordManager:
                 labelList.append(str(fret))
         labelList.reverse()
         return labelList
-                
+    def gettagsfordbsearch(self):
+        '''returns active tag list in string format suitable for database search. e.g. (tag1, tag2, tag3) '''
+        return "('"+"', '".join(self.tags)+"')"
+
+    def gettagsforstringvar(self):
+        '''returns active tags in string format suitable for tkinter's listbox's stringvar'''
+        return ' '.join(self.tags)
+    
+    def settagsfromtaggroup(self, taggroupname):
+        self.tags = confighandler.gettagsfromtaggroup(taggroupname)
+
     def setnew(self):
-        newfromdb = fetchrandfing()
+        if len(self.tags) == 0:
+            newfromdb = DBOperations.fetchrandfing()
+        else:
+            newfromdb = DBOperations.fetch_rand_fingering_from_tags(self.tags)
         self.parsefing(newfromdb)
         self.parsetags(newfromdb)
         self.setrandposition()
         self.setmidinotes()
-

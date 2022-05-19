@@ -5,6 +5,12 @@ import time
 CHORDDURATION = 1.25
 ARPDURATION = .5
 
+inst_dict = {'Acoustic Grand Piano': 1, 
+             'Acoustic Guitar (nylon)': 25,
+             'Electric Guitar (jazz)': 27,
+             'Overdriven Guitar': 30,
+             'Distortion Guitar': 31 }
+
 class Player:
     def __init__(self):
         self.midiout = None
@@ -16,6 +22,10 @@ class Player:
             self.midiout.open_port(0)
         except:
             print("unable to open port")
+    
+    def changeinstrument(self, instname):
+        instnum=inst_dict[instname]
+        self.midiout.send_message([0xC0, instnum, 0])
         
     def makeonoffmessages(self, notes):
         """returns list of tuples of on/off messages for a given
