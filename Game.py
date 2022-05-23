@@ -1,8 +1,7 @@
 import tkinter as tk
-from tkinter import BOTTOM, END, LEFT, RIGHT, TOP, Menu, Toplevel, ttk, messagebox 
+from tkinter import BOTTOM, END, LEFT, TOP, Menu, Toplevel, ttk, messagebox 
 from ctypes import windll
 
-from matplotlib.pyplot import text
 from fingerings import ChordManager
 from Player import Player
 from Player import inst_dict
