@@ -1,5 +1,4 @@
 import configparser
-import DBOperations
 
 
 def listtostring(listofstrings):

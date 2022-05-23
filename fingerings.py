@@ -74,3 +74,4 @@ class ChordManager:
         self.parsetags(newfromdb)
         self.setrandposition()
         self.setmidinotes()
+
