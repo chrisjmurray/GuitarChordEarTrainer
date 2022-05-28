@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import BOTTOM, END, LEFT, TOP, Menu, Toplevel, ttk, messagebox 
 from ctypes import windll
+from FretDiagram import FretDiagramCanvas
 
 from fingerings import ChordManager
 from Player import Player
@@ -386,12 +387,7 @@ class Game:
         self.settings = Settings.SettingsHolder()
         self.cm.settagsfromtaggroup(self.settings.getconfigtaggroup())
         self.player.changeinstrument(confighandler.getsetting('playback_instrument'))
-        lbl_1string_text = "e: "
-        lbl_2string_text = "B: "
-        lbl_3string_text = "G: "
-        lbl_4string_text = "D: "
-        lbl_5string_text = "A: "
-        lbl_6string_text = "E: "
+        
         self.isDuringTurn=False
 
         self.master = master
@@ -416,33 +412,10 @@ class Game:
         menubar.add_cascade(label="Options", menu=optionsmenu)
         master.config(menu=menubar)
 
-        #Labels for string numbers and fret numbers
-        frame_output = ttk.Frame(master=master)
-        self.lbl_1string = ttk.Label(text=lbl_1string_text, master=frame_output)
-        self.lbl_1string.grid(row=0, column=0)
-        self.lbl_1fret = ttk.Label(text='x', master = frame_output)
-        self.lbl_1fret.grid(row=0, column=1)
-        self.lbl_2string = ttk.Label(text=lbl_2string_text, master=frame_output)
-        self.lbl_2string.grid(row=1, column=0)
-        self.lbl_2fret = ttk.Label(text='x', master=frame_output)
-        self.lbl_2fret.grid(row=1, column=1)
-        self.lbl_3string = ttk.Label(text=lbl_3string_text, master=frame_output)
-        self.lbl_3string.grid(row=2, column=0)
-        self.lbl_3fret = ttk.Label(text='x', master=frame_output)
-        self.lbl_3fret.grid(row=2, column=1)
-        self.lbl_4string = ttk.Label(text=lbl_4string_text, master=frame_output)
-        self.lbl_4string.grid(row=3, column=0)
-        self.lbl_4fret = ttk.Label(text='x', master=frame_output)
-        self.lbl_4fret.grid(row=3, column=1)
-        self.lbl_5string = ttk.Label(text=lbl_5string_text, master=frame_output)
-        self.lbl_5string.grid(row=4, column=0)
-        self.lbl_5fret = ttk.Label(text='x', master=frame_output)
-        self.lbl_5fret.grid(row=4, column=1)
-        self.lbl_6string = ttk.Label(text=lbl_6string_text, master=frame_output)
-        self.lbl_6string.grid(row=5, column=0)
-        self.lbl_6fret = ttk.Label(text='x', master=frame_output)
-        self.lbl_6fret.grid(row=5, column=1)
-        frame_output.pack(expand=True)
+        fretdiagramcanvas = tk.Canvas(master)
+        fretdiagramcanvas.pack()
+        fretdiagramcanvas.update()
+        self.fretdiagram = FretDiagramCanvas(self.cm, fretdiagramcanvas)
 
         #buttons Next, arppegiate, repeat
         frame_control = ttk.Frame(master=master)
@@ -458,27 +431,17 @@ class Game:
         btn_arpeggiate.pack(side=LEFT)
         master.bind('a', self.btn_arpeggiate_action)
 
-        #btn_help = ttk.Button(text="Help", master=frame_control, command=self.btn_help_action)
-        #btn_help.pack(side=LEFT)
         frame_control.pack(side=BOTTOM)
-    
-    def update_fret_labels(self, labelList):
-        self.lbl_1fret['text'] = labelList[0]
-        self.lbl_2fret['text'] = labelList[1]
-        self.lbl_3fret['text'] = labelList[2]
-        self.lbl_4fret['text'] = labelList[3]
-        self.lbl_5fret['text'] = labelList[4]
-        self.lbl_6fret['text'] = labelList[5]
+
 
     def btn_continue_action(self, *args):
         if self.isDuringTurn:
             self.isDuringTurn = False
-            labelList = self.cm.getfretlabels()
-            self.update_fret_labels(labelList)
+            self.fretdiagram.showfrets()
         
         elif not self.isDuringTurn:
             self.isDuringTurn = True
-            self.update_fret_labels(['x']*6)
+            self.fretdiagram.showblank()
             self.cm.setnew()
             self.player.playchord(self.cm.midinotes)
 

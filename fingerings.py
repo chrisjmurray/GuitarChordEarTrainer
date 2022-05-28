@@ -6,6 +6,7 @@ class ChordManager:
     def __init__(self, tags = None):
         self.tuning = [40, 45, 50, 55, 59, 64] #holds midi note values of the open guitar strings, indexed same as fingerings
         self.fingering = [] #low E string at index 0, high E at index 5
+        self.zeroedfingering = []
         self.midinotes = [] #holds the midi note value
         self.maxposition = 15
         if tags == None:
@@ -16,6 +17,7 @@ class ChordManager:
 
     def parsefing(self, newfromdb):
         fingstring = newfromdb[0]
+        self.zeroedfingering = list(map(int, fingstring.split(',')))
         self.fingering = list(map(int, fingstring.split(',')))
 
     def parsetags(self, newfromdb):

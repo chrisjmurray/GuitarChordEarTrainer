@@ -103,7 +103,6 @@ def drop_table(conn):
         print(e)
 
 def insert_fingering(conn, fingering, tags):
-    #conn = create_connection()
     sql_fingering = '''INSERT OR IGNORE INTO fingerings(fingering)
                        VALUES(?)''' 
     sql_tags =  '''INSERT OR IGNORE INTO tags(tag_title)
@@ -114,10 +113,8 @@ def insert_fingering(conn, fingering, tags):
                            WHERE tag_title = ? '''
     cur = conn.cursor()
     try:
-        #insert fingering
-        #if no tags, tags=[untagged]
-        #for tag in tags, insert tag, get tag_id, insert tag_id and fingering
-        cur.execute(sql_fingering, (fingering,))
+        cur.execute(sql_fingering, (fingering, ))
+
         if len(tags) == 0:
             tags = ['untagged']
         for tag in tags:
@@ -126,7 +123,6 @@ def insert_fingering(conn, fingering, tags):
             tag_ids = cur.fetchall()
             cur.execute(sql_tags_fingerings, (fingering, tag_ids[0][0],))
         conn.commit()
-        #conn.close()
         return cur.lastrowid
     except Error as e:
         conn.close()
